@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { getBooks, deleteBook, searchBooks } from '../services/api';
+import axios from 'axios';
+import { deleteBook, searchBooks } from '../services/api';
 import BookList from '../components/BookList';
 import BookSearch from '../components/BookSearch';
 import { Link } from 'react-router-dom';
@@ -8,17 +9,24 @@ const Home = () => {
   const [books, setBooks] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  // 🔹 ดึงข้อมูลจาก API ที่ให้มา
   const fetchBooks = async () => {
     setLoading(true);
     try {
-      const res = await getBooks();
-      if (res.success) setBooks(res.data);
+      const res = await axios.get(
+        'https://bookshop-api-er7t.onrender.com/api/books?page=1&limit=10'
+      );
+
+      if (res.data && res.data.success) {
+        setBooks(res.data.data); // API ส่ง data อยู่ใน res.data.data
+      }
     } catch (error) {
       alert('เกิดข้อผิดพลาดในการโหลดข้อมูล');
     }
     setLoading(false);
   };
 
+  // 🔍 ค้นหาหนังสือ
   const handleSearch = async (query) => {
     if (!query) return fetchBooks();
 
@@ -32,6 +40,7 @@ const Home = () => {
     setLoading(false);
   };
 
+  // 🗑️ ลบหนังสือ
   const handleDelete = async (id) => {
     if (window.confirm('คุณต้องการลบหนังสือนี้ใช่ไหม?')) {
       try {
